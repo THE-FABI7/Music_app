@@ -5,10 +5,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.Toast;
+
+import com.example.applemusic.Datasource.ApleeMusicServiceApi;
+import com.example.applemusic.Datasource.RemoteDataSource;
 
 import com.example.applemusic.R;
 
@@ -20,6 +24,8 @@ public class MainActivity extends AppCompatActivity {
     private EditText buscar = null;
 
     private ProgressDialog progressDialog;
+
+    private ApleeMusicServiceApi apleeMusicServiceApi = new ApleeMusicServiceApi();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +57,28 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(MainActivity.this, "Por favor ingrese el nombre del artista", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        apleeMusicServiceApi.requestSongsByTerm(buscarName, 10,
+                text -> {
+                    // Handle the text response here
+                    runOnUiThread(() -> {
+                        progressDialog.dismiss();
+                        Log.d("API_RESPONSE", text);
+                        // Update your UI with the search results
+                        Toast.makeText(MainActivity.this, "Búsqueda completada", Toast.LENGTH_SHORT).show();
+                    });
+                },
+                errorCode -> {
+                    // Handle the error code here
+                    runOnUiThread(() -> {
+                        progressDialog.dismiss();
+                        Log.e("API_ERROR", "Error code: " + errorCode);
+                        Toast.makeText(MainActivity.this, "Error en la búsqueda: " + errorCode, Toast.LENGTH_SHORT).show();
+                    });
+                }
+        );
+
+
 
         // Simular una operación de red con un retardo
         new Handler().postDelayed(() -> {
