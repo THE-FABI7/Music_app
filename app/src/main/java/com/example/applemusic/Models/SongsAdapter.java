@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.applemusic.Models.Result;
 import com.example.applemusic.R;
 
@@ -45,10 +46,17 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.SongViewHold
         Result song = songs.get(position);
         holder.songName.setText(song.getTrackName());
         holder.songDuration.setText(formatDuration(song.getTrackTimeMillis()));
-        // Load image with your preferred image loading library (like Picasso or Glide)
-        // Example: Glide.with(context).load(song.getArtworkUrl100()).into(holder.songImage);
+
+        // Cargar la imagen de la carátula con Glide
+        Glide.with(context)
+                .load(song.getArtworkUrl100())
+                .placeholder(R.drawable.ic_placeholder) // una imagen de placeholder en res/drawable
+                .error(R.drawable.ic_placeholder) // una imagen de error en res/drawable
+                .into(holder.songImage);
+
         holder.playButton.setOnClickListener(v -> listener.onPlayButtonClick(song));
     }
+
 
     @Override
     public int getItemCount() {

@@ -1,0 +1,6 @@
+<resources>
+    <style name="GreenSeekBarStyle" parent="Widget.AppCompat.SeekBar">
+        <item name="colorControlNormal">@color/green_500</item>   <!-- Color for normal state -->
+        <item name="colorControlActivated">@color/green_700</item> <!-- Color for activated state -->
+    </style>
+</resources>

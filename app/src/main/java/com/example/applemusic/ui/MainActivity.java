@@ -1,6 +1,8 @@
 package com.example.applemusic.ui;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -8,10 +10,13 @@ import android.app.ProgressDialog;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ScrollView;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.example.applemusic.Datasource.ApleeMusicServiceApi;
@@ -37,6 +42,11 @@ public class MainActivity extends AppCompatActivity {
     private ApleeMusicServiceApi appleMusicServiceApi;
     private List<Result> songsList = new ArrayList<>();
 
+    private Button btnPause;
+    private SeekBar seekBar;
+    private Handler mHandler = new Handler();
+    private Runnable mRunnable;
+
     private MediaPlayer mediaPlayer =  new MediaPlayer();
 
     @Override
@@ -48,18 +58,34 @@ public class MainActivity extends AppCompatActivity {
 
         appleMusicServiceApi = new ApleeMusicServiceApi(); // Initialize the API service
         setupRecyclerView();
+        DrawableCompat.setTint(btnPause.getBackground(), ContextCompat.getColor(this, R.color.green_700));
     }
 
     public void initViews(){
         btnSearch = findViewById(R.id.search_button);
         buscar = findViewById(R.id.search_field);
         songsRecyclerView = findViewById(R.id.songs_recycler_view);
+        btnPause = findViewById(R.id.pause_button);
+        seekBar = findViewById(R.id.music_seekbar);
+
+        seekBar.setVisibility(View.GONE);
+        btnPause.setVisibility(View.GONE);
     }
 
     public void initEvents(){
         btnSearch.setOnClickListener(view -> {
             showProgressDialog();
             requestMusic();
+        });
+        btnPause.setOnClickListener(view -> {
+            if(mediaPlayer.isPlaying()) {
+                mediaPlayer.pause();
+                btnPause.setText("Play");
+            } else {
+                mediaPlayer.start();
+                btnPause.setText("Pause");
+                updateSeekBar();
+            }
         });
     }
 
@@ -137,7 +163,15 @@ public class MainActivity extends AppCompatActivity {
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mediaPlayer.setDataSource(url);
             mediaPlayer.prepareAsync();
-            mediaPlayer.setOnPreparedListener(mp -> mediaPlayer.start());
+            mediaPlayer.setOnPreparedListener(mp -> {
+                mediaPlayer.start();
+                seekBar.setMax(mediaPlayer.getDuration());
+                updateSeekBar();
+
+                // Mostrar la barra de progreso y el botón de pausa
+                seekBar.setVisibility(View.VISIBLE);
+                btnPause.setVisibility(View.VISIBLE);
+            });
         } catch (IOException e) {
             Log.e("MEDIA_PLAYER", "Error preparing MediaPlayer", e);
             Toast.makeText(MainActivity.this, "Error al reproducir la canción", Toast.LENGTH_SHORT).show();
@@ -151,5 +185,23 @@ public class MainActivity extends AppCompatActivity {
             mediaPlayer = null;
         }
         super.onDestroy();
+
+        if (mHandler != null) {
+            mHandler.removeCallbacks(mRunnable);
+        }
     }
+
+    //Linea de reproducion de la cancion
+    private void updateSeekBar() {
+        seekBar.setProgress(mediaPlayer.getCurrentPosition());
+
+        if(mediaPlayer.isPlaying()) {
+            mRunnable = () -> {
+                updateSeekBar();
+            };
+            mHandler.postDelayed(mRunnable, 1000);
+        }
+    }
+
+
 }
