@@ -7,3 +7,5 @@ fabSpotify es una aplicación móvil desarrollada en Java con Groovy. Su objetiv
 # Características
 Búsqueda de artistas: Los usuarios pueden buscar artistas por nombre y obtener información detallada sobre ellos.
 Reproducción de canciones: fabSpotify permite reproducir 30 segundos de cualquier canción encontrada. Esto se logra mediante la integración con la API de Spotify.
+
+# instalación 
