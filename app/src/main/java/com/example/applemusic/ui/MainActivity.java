@@ -31,6 +31,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Actividad principal de la aplicación Apple Music.
+ */
 public class MainActivity extends AppCompatActivity {
 
     private Button btnSearch = null;
@@ -47,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
     private Handler mHandler = new Handler();
     private Runnable mRunnable;
 
-    private MediaPlayer mediaPlayer =  new MediaPlayer();
+    private MediaPlayer mediaPlayer = new MediaPlayer();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,12 +59,15 @@ public class MainActivity extends AppCompatActivity {
         initViews();
         initEvents();
 
-        appleMusicServiceApi = new ApleeMusicServiceApi(); // Initialize the API service
+        appleMusicServiceApi = new ApleeMusicServiceApi(); // Inicializar el servicio de API
         setupRecyclerView();
         DrawableCompat.setTint(btnPause.getBackground(), ContextCompat.getColor(this, R.color.green_700));
     }
 
-    public void initViews(){
+    /**
+     * Inicializa las vistas de la actividad.
+     */
+    public void initViews() {
         btnSearch = findViewById(R.id.search_button);
         buscar = findViewById(R.id.search_field);
         songsRecyclerView = findViewById(R.id.songs_recycler_view);
@@ -72,13 +78,16 @@ public class MainActivity extends AppCompatActivity {
         btnPause.setVisibility(View.GONE);
     }
 
-    public void initEvents(){
+    /**
+     * Inicializa los eventos de la actividad.
+     */
+    public void initEvents() {
         btnSearch.setOnClickListener(view -> {
             showProgressDialog();
             requestMusic();
         });
         btnPause.setOnClickListener(view -> {
-            if(mediaPlayer.isPlaying()) {
+            if (mediaPlayer.isPlaying()) {
                 mediaPlayer.pause();
                 btnPause.setText("Play");
             } else {
@@ -89,29 +98,34 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Configura el RecyclerView para mostrar las canciones.
+     */
     private void setupRecyclerView() {
         songsAdapter = new SongsAdapter(this, songsList, song -> {
-            // Handle play button click
+            // Manejar el clic en el botón de reproducción
             playSong(song.getPreviewUrl());
-            Toast.makeText(MainActivity.this, "Playing " + song.getTrackName(), Toast.LENGTH_SHORT).show();
-            // Implement actual play functionality here
+            Toast.makeText(MainActivity.this, "Reproduciendo " + song.getTrackName(), Toast.LENGTH_SHORT).show();
         });
         songsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         songsRecyclerView.setAdapter(songsAdapter);
     }
 
+    /**
+     * Realiza una solicitud para obtener música basada en el término de búsqueda ingresado.
+     */
     public void requestMusic() {
         String buscarName = buscar.getText().toString();
 
         if (buscarName.isEmpty()) {
-            progressDialog.dismiss();  // Close the dialog if the field is empty
+            progressDialog.dismiss();  // Cerrar el diálogo si el campo está vacío
             Toast.makeText(MainActivity.this, "Por favor ingrese el nombre del artista", Toast.LENGTH_SHORT).show();
             return;
         }
 
         appleMusicServiceApi.requestSongsByTerm(buscarName, 10,
                 text -> {
-                    // Parse the text response into a Root object
+                    // Analizar la respuesta de texto en un objeto Root
                     Root root = parseResponse(text);
                     runOnUiThread(() -> {
                         progressDialog.dismiss();
@@ -136,6 +150,12 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
+    /**
+     * Analiza la respuesta JSON y la convierte en un objeto Root.
+     *
+     * @param response La respuesta JSON en formato de cadena.
+     * @return El objeto Root resultante.
+     */
     private Root parseResponse(String response) {
         Gson gson = new Gson();
         try {
@@ -146,13 +166,21 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Muestra un diálogo de progreso mientras se realiza una búsqueda.
+     */
     private void showProgressDialog() {
         progressDialog = new ProgressDialog(MainActivity.this);
         progressDialog.setMessage("Buscando...");
-        progressDialog.setCancelable(false);  // Make the dialog non-cancelable
+        progressDialog.setCancelable(false);  // Hacer que el diálogo no se pueda cancelar
         progressDialog.show();
     }
 
+    /**
+     * Reproduce una canción desde la URL proporcionada.
+     *
+     * @param url La URL de la canción a reproducir.
+     */
     private void playSong(String url) {
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.stop();
@@ -191,17 +219,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    //Linea de reproducion de la cancion
+    /**
+     * Actualiza la barra de progreso de la canción.
+     */
     private void updateSeekBar() {
         seekBar.setProgress(mediaPlayer.getCurrentPosition());
 
-        if(mediaPlayer.isPlaying()) {
+        if (mediaPlayer.isPlaying()) {
             mRunnable = () -> {
                 updateSeekBar();
             };
             mHandler.postDelayed(mRunnable, 1000);
         }
     }
-
-
 }
