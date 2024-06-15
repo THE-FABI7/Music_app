@@ -1,4 +1,4 @@
-<img src="https://github.com/THE-FABI7/Music_app/assets/80603614/9cb72ed5-3ced-4eb8-ace1-474def512426" width="300">
+<img src="https://github.com/THE-FABI7/Music_app/assets/80603614/439df20a-5ccc-4a4b-8278-16969415925e" width="300">
 <img src="https://github.com/THE-FABI7/Music_app/assets/80603614/638d606f-6132-48f0-9d5c-3d31b4f28cdc" width="300"
 
 # FabSpotify
